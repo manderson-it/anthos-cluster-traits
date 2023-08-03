@@ -1,0 +1,6 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+ name: any
+ annotations:
+   client.lifecycle.config.k8s.io/mutation: ignore

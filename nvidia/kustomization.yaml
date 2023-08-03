@@ -1,0 +1,13 @@
+resources:
+- base
+
+patches:
+- path: ignore-deployment-mutation-patch.yaml
+  target:
+    kind: Deployment
+- path: ignore-statefulset-mutation-patch.yaml
+  target:
+    kind: StatefulSet
+- path: delete-crd-status.yaml
+  target:
+    kind: CustomResourceDefinition

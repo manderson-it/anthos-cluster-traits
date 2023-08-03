@@ -1,0 +1,285 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.7.0
+  creationTimestamp: null
+  name: sds.anthos-sds.anthos.io
+spec:
+  group: anthos-sds.anthos.io
+  names:
+    kind: SDS
+    listKind: SDSList
+    plural: sds
+    singular: sds
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.phase
+      name: PHASE
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: SDS is the Schema for the software-defined storage API. It is
+          vendor-agnostic and a wrapper of the vendor-specific resource API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: SDSSpec defines the desired state of SDS.
+            properties:
+              imageRepo:
+                description: ImageRepo defines the docker images repository where
+                  the images required for deploying the SDS are stored.
+                type: string
+              namespace:
+                description: Namespace defines the namespace where the SDS will be
+                  installed.
+                type: string
+              sdsVendor:
+                description: SDSVendor defines the vendor which will provide the SDS.
+                properties:
+                  name:
+                    description: Name defines the vendor name.
+                    enum:
+                    - Robin
+                    type: string
+                  robin:
+                    description: Robin defines the specific desired state of Robin
+                      SDS cluster.
+                    properties:
+                      appInstanceName:
+                        default: robin
+                        description: AppInstanceName defineds the name of the Robin
+                          app instance.
+                        type: string
+                      diskDiscovery:
+                        description: DiskDiscovery defines rules to drive Robin disk
+                          discovery process.
+                        properties:
+                          automatic:
+                            default: true
+                            description: Automatic defines whether Robin.io SDS should
+                              automatically discover and add disks to the Robin storage
+                              pool. In automatic mode Robin will discover and automatically
+                              add only non-root, unformatted disk devices, other disk
+                              devices can be added manually. If this value is false
+                              - then SDS operator will match all available disk devices
+                              against the list of Matchers defined below and add them
+                              to Robin storage pool.
+                            type: boolean
+                          matchers:
+                            description: Matchers defines a list of rules that will
+                              be used to match discovered disks and add them to the
+                              Robin storage pool. Every discovered disk is matched
+                              against the rules in an 'OR' fashion, so matching terminates
+                              upon first match. This value is only considered if Automatic
+                              is false. If Automatic is false and Matchers list is
+                              empty then Robin will start with no disks in the storage
+                              pool.
+                            items:
+                              description: RobinDiskDiscoveryMatcher represents an
+                                individual rule that will be used to match discovered
+                                disks. If a disk matches the rule, it'll be added
+                                to the Robin storage pool.
+                              properties:
+                                diskMatcher:
+                                  description: DiskMatcher supports multiple ways
+                                    to match disks.
+                                  properties:
+                                    diskByIDMatcher:
+                                      description: 'DiskByIDMatcher represents a regex
+                                        to match disk device names in the `/dev/disk/by-id`
+                                        folder. Only the device name is matched, the
+                                        `/dev/disk/by-id/` prefix is ignored. DiskByIDMatcher
+                                        supports 2 special values: ''*'', '''' (empty)
+                                        - both match all disk devices.'
+                                      type: string
+                                    diskDevMatcher:
+                                      description: 'DiskDevMatcher represents a regex
+                                        to match disk device names in the `/dev` folder.
+                                        Only the device name is matched, the `/dev/`
+                                        prefix is ignored. DiskDevMatcher supports
+                                        2 special values: ''*'', '''' (empty) - both
+                                        match all disk devices.'
+                                      type: string
+                                    diskWWNMatcher:
+                                      description: 'DiskWWNMatcher represents a regex
+                                        to match disk WWNs. DiskWWNMatcher supports
+                                        2 special values: ''*'', '''' (empty) - both
+                                        match all disk devices.'
+                                      type: string
+                                    type:
+                                      description: Type defines the matcher type.
+                                      enum:
+                                      - dev
+                                      - by-id
+                                      - wwn
+                                      type: string
+                                  required:
+                                  - type
+                                  type: object
+                                hostMatcher:
+                                  description: 'HostMatcher represents a regex to
+                                    match cluster nodes. HostMatcher supports 2 special
+                                    values: ''*'', '''' (empty) - both match all nodes.'
+                                  type: string
+                              required:
+                              - diskMatcher
+                              - hostMatcher
+                              type: object
+                            type: array
+                        required:
+                        - automatic
+                        type: object
+                      dnsService:
+                        default: kube-system/kube-dns
+                        description: DNSService defines the name of the DNS service
+                          which is used in the cluster. This is only used when UpdateCoreDNS
+                          is set to 1.
+                        type: string
+                      hostType:
+                        description: HostType defines the type of host, e.g., gcp,
+                          physical.
+                        enum:
+                        - gcp
+                        - physical
+                        - baremetal
+                        - ec2
+                        - vmware
+                        type: string
+                      loginSecret:
+                        description: LoginSecret contains the login details for admin
+                          user on Robin. It is auto-generated if not supplied by the
+                          user.
+                        type: string
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        description: NodeSelector helps specify the nodes on which
+                          the Robin daemonset pods are scheduled.
+                        type: object
+                      reportingSecret:
+                        description: ReportingSecret defines the name of the secret
+                          which is used for billing report.
+                        type: string
+                      robinCrashDir:
+                        default: /home/robinds
+                        description: RobinCrashDir defines the host directory where
+                          the Robin crash are stored.
+                        type: string
+                      robinDsDir:
+                        default: /home/robinds
+                        description: RobinDsDir defines the host directory where the
+                          Robin postgresql database is stored.
+                        type: string
+                      robinLogDir:
+                        default: /home/robinds
+                        description: RobinLogDir defines the host directory where
+                          the Robin logs are stored.
+                        type: string
+                      storageProvisionFactor:
+                        description: StorageProvisionFactor enables thin provisioning
+                          if set to a value > 1.
+                        type: string
+                      updateCoreDns:
+                        default: "0"
+                        description: UpdateCoreDNS defines whether to enable the custom
+                          CoreDNS. If set to 1, the custom CoreDNS will be enabled.
+                        type: string
+                      useMarketplaceRepo:
+                        description: UseMarketplaceRepo if true overrides the SDS.SDSSpec.ImageRepo
+                          and uses Google Marketplace based Robin repo "gcr.io/robinio-public/robin-storage"
+                          to serve Robin images.
+                        type: boolean
+                    required:
+                    - diskDiscovery
+                    type: object
+                type: object
+            required:
+            - sdsVendor
+            type: object
+          status:
+            description: SDSStatus defines the observed state of SDS.
+            properties:
+              message:
+                description: A human-readable message indicating details about why
+                  backup is in this state.
+                type: string
+              phase:
+                description: Phase is the observed phase of SDS.
+                type: string
+              reason:
+                description: Reason is a brief CamelCase string that describes any
+                  update and is meant for machine parsing and tidy display.
+                type: string
+              sdsVendor:
+                description: SDSVendor is the status of the SDSVendor.
+                properties:
+                  name:
+                    description: Name defines the vendor name.
+                    enum:
+                    - Robin
+                    type: string
+                  robin:
+                    description: Robin defines the specific current state of Robin
+                      SDS cluster.
+                    properties:
+                      connectCommand:
+                        description: ConnectCommand is the command to connect to the
+                          Robin master node.
+                        type: string
+                      getRobinClient:
+                        description: GetRobinClient is the command to get the client
+                          of Robin cluster.
+                        type: string
+                      nodeStatus:
+                        description: 'RobinNodeStatus is the observed state of the
+                          Robin nodes. TODO: Implement a dedicated CRD to store the
+                          node status and get rid of this.'
+                        items:
+                          description: RobinNodeStatus defines the observed state
+                            of a node.
+                          properties:
+                            currentVersion:
+                              description: CurrentVersion is the observed version
+                                of the SDS node.
+                              type: string
+                            hostName:
+                              description: HostName is the full name of the host.
+                              type: string
+                            k8sNodeName:
+                              description: K8sNodeName is the name of the kubernetes
+                                node.
+                              type: string
+                            roles:
+                              description: Roles is the obeserved roles of the node.
+                              type: string
+                            state:
+                              description: State is the observed state of the SDS
+                                node.
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                type: object
+              version:
+                description: Version is the observed version of SDS.
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: robin-admin
+spec:
+  type: LoadBalancer
+  selector:
+    robin.io/robinrole: master
+  ports:
+  - name: rcmserver
+    port: 29442
+    protocol: TCP
+    targetPort: 29442
+  - name: rcmwatchdog
+    port: 29444
+    protocol: TCP
+    targetPort: 29444
+  - name: robin-admin-ui
+    port: 29443
+    protocol: TCP
+    targetPort: 29443

@@ -1,0 +1,24 @@
+apiVersion: anthos-sds.anthos.io/v1alpha1
+kind: SDS
+metadata:
+  name: sds-robin
+spec:
+  namespace: robinio
+  imageRepo: us-central1-docker.pkg.dev/anthos-sds-dev/robin
+  sdsVendor:
+    name: Robin
+    robin:
+      hostType: physical
+      useMarketplaceRepo: true
+      # If set to 1 RobinOperator will install coredns in an attempt to make
+      # nodes discoverable through DNS hostnames.
+      updateCoreDns: "1"
+      diskDiscovery:
+        automatic: false
+        matchers:
+        - hostMatcher: '.*'                     # all hosts
+          diskMatcher:
+            # type: by-id
+            # diskByIDMatcher: "dm-uuid-LVM.*"
+            type: wwn
+            diskWWNMatcher: '.*robin.*'     # match any disks that are in the LVM Group with name "*-lvm-robin-*"

@@ -1,0 +1,11 @@
+
+resources:
+- base
+
+patches:
+- path: ignore-deployment-mutation-patch.yaml
+  target:
+    kind: Deployment
+- path: ignore-statefulset-mutation-patch.yaml
+  target:
+    kind: StatefulSet

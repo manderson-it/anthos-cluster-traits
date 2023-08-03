@@ -1,0 +1,11 @@
+helmGlobals:
+  chartHome: charts
+
+helmCharts:
+- name: external-secrets
+  repo: https://charts.external-secrets.io
+  version: v0.7.0
+  releaseName: external-secrets
+  namespace: external-secrets
+#  valuesInline:
+  includeCRDs: true

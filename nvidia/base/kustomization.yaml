@@ -1,0 +1,23 @@
+helmGlobals:
+  chartHome: charts
+
+helmCharts:
+- name: gpu-operator
+  repo: https://helm.ngc.nvidia.com/nvidia
+  version: v23.3.2
+  releaseName: gpu-operator
+  namespace: gpu-operator
+  includeCRDs: true
+  #valuesInline:
+
+resources:
+  - resource-quota.yaml
+
+patches:
+- patch: |-
+    - op: add
+      path: /metadata/namespace
+      value:
+        gpu-operator
+  target:
+    kind: Role|RoleBinding|ServiceAccount|Deployment|ConfigMap|Service|DaemonSet|ResourceQuota
